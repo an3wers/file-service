@@ -1,36 +1,41 @@
-import { FileModel } from "../models/file.model";
-import { IFileRepository } from "../repository/repository.interfaces";
 import { IUploadStrategy } from "./strategy.interfaces";
 import { v4 as uuidv4 } from "uuid";
+import { IFileDbRepository } from "../repository/repository.interfaces";
 import path from "path";
+import { FileMeta } from "../models/file-meta.model";
 
 export class DBStrategy implements IUploadStrategy {
-  constructor(private fileRepository: IFileRepository) {}
+  constructor(private fileRepository: IFileDbRepository) {}
 
-  async upload(file: Express.Multer.File): Promise<FileModel> {
-    const newFile = new FileModel({
+  async upload(file: Express.Multer.File): Promise<FileMeta> {
+    const createdFile = await this.fileRepository.create({
+      id: "",
+      uuid: uuidv4(),
+      contents: file.buffer,
+    });
+
+    return new FileMeta({
+      id: "",
       uuid: uuidv4(),
       name: file.originalname,
       extension: path.extname(file.originalname),
       size: file.size,
       path: "",
-      contents: file.buffer,
+      fileId: createdFile.id,
     });
-
-    await this.fileRepository.create(newFile);
-
-    return newFile;
   }
 
-  async download(fileId: string): Promise<Buffer> {
-    const file = await this.fileRepository.findById(fileId);
+  async download(fileMeta: FileMeta): Promise<{ contents: Buffer }> {
+    const file = await this.fileRepository.findById(fileMeta.fileId);
+
     if (!file) {
       throw new Error("File not found");
     }
-    return file.contents!;
+
+    return { contents: file.contents };
   }
 
-  async delete(fileId: string): Promise<void> {
-    await this.fileRepository.delete(fileId);
+  async delete(fileMeta: FileMeta): Promise<void> {
+    await this.fileRepository.delete(fileMeta.fileId);
   }
 }

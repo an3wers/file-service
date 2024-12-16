@@ -2,34 +2,50 @@ import { IUploadStrategy } from "./strategy.interfaces";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
 import { config } from "../../config";
-import fs from "fs/promises";
-import { FileModel } from "../models/file.model";
+import fs from "fs";
+import { writeFile, unlink } from "fs/promises";
+import { FileMeta } from "../models/file-meta.model";
 
 export class LSStrategy implements IUploadStrategy {
-  async upload(file: Express.Multer.File): Promise<FileModel> {
+  async upload(file: Express.Multer.File): Promise<FileMeta> {
     const uuid = uuidv4();
+
     const fileName = file.originalname;
     const filePath = path.join(config.localStoragePath, uuid, fileName);
 
-    await fs.writeFile(filePath, file.buffer);
+    await writeFile(filePath, file.buffer);
 
-    return new FileModel({
+    return new FileMeta({
+      id: "",
       uuid,
       name: file.originalname,
       extension: path.extname(file.originalname),
       size: file.size,
       path: filePath,
-      contents: null,
+      fileId: uuid,
     });
   }
 
-  async download(uuid: string, name: string): Promise<Buffer> {
-    const filePath = path.join(config.localStoragePath, uuid, name);
-    return fs.readFile(filePath);
+  async download(fileMeta: FileMeta): Promise<void> {
+    const filePath = path.join(
+      config.localStoragePath,
+      fileMeta.fileId,
+      fileMeta.name
+    );
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error("File not found");
+    }
+
+    return;
   }
 
-  async delete(uuid: string, name: string): Promise<void> {
-    const filePath = path.join(config.localStoragePath, uuid, name);
-    await fs.unlink(filePath);
+  async delete(fileMeta: FileMeta): Promise<void> {
+    const filePath = path.join(
+      config.localStoragePath,
+      fileMeta.fileId,
+      fileMeta.name
+    );
+    await unlink(filePath);
   }
 }

@@ -2,7 +2,7 @@ import { S3 } from "aws-sdk";
 import { v4 as uuidv4 } from "uuid";
 import { config } from "../../config";
 import { IUploadStrategy } from "./strategy.interfaces";
-import { FileModel } from "../models/file.model";
+import { FileMeta } from "../models/file-meta.model";
 import path from "path";
 
 export class S3Strategy implements IUploadStrategy {
@@ -16,11 +16,11 @@ export class S3Strategy implements IUploadStrategy {
     });
   }
 
-  async upload(file: Express.Multer.File): Promise<FileModel> {
+  async upload(file: Express.Multer.File): Promise<FileMeta> {
     const uuid = uuidv4();
     const key = `${uuid}-${file.originalname}`;
 
-    await this.s3
+    const response = await this.s3
       .upload({
         Bucket: config.s3.bucket,
         Key: key,
@@ -28,18 +28,19 @@ export class S3Strategy implements IUploadStrategy {
       })
       .promise();
 
-    return new FileModel({
+    return new FileMeta({
+      id: "",
       uuid,
       name: file.originalname,
       extension: path.extname(file.originalname),
       size: file.size,
-      path: key,
-      contents: null,
+      path: response.Location,
+      fileId: uuid,
     });
   }
 
-  async download(uuid: string, name: string): Promise<Buffer> {
-    const key = `${uuid}-${name}`;
+  async download(fileMeta: FileMeta): Promise<void> {
+    const key = `${fileMeta.fileId}-${fileMeta.name}`;
     const result = await this.s3
       .getObject({
         Bucket: config.s3.bucket,
@@ -47,11 +48,15 @@ export class S3Strategy implements IUploadStrategy {
       })
       .promise();
 
-    return result.Body as Buffer;
+    if (!result.Body) {
+      throw new Error("File not found");
+    }
+
+    return;
   }
 
-  async delete(uuid: string, name: string): Promise<void> {
-    const key = `${uuid}-${name}`;
+  async delete(fileMeta: FileMeta): Promise<void> {
+    const key = `${fileMeta.fileId}-${fileMeta.name}`;
 
     await this.s3
       .deleteObject({

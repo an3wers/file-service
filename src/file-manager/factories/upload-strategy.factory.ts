@@ -1,4 +1,4 @@
-import { IFileRepository } from "../repository/repository.interfaces";
+import { IFileDbRepository } from "../repository/repository.interfaces";
 import { DBStrategy } from "../strategies/db.strategy";
 import { LSStrategy } from "../strategies/ls.strategy";
 import { S3Strategy } from "../strategies/s3.strategy";
@@ -11,14 +11,17 @@ export enum UploadStrategies {
 }
 
 export class UploadStrategyFactory {
-  static createStrategy(type: UploadStrategies, fileRepository: IFileRepository): IUploadStrategy {
+  static createStrategy(
+    type: UploadStrategies,
+    fileDbRepository: IFileDbRepository
+  ): IUploadStrategy {
     switch (type) {
       case UploadStrategies.LOCAL:
         return new LSStrategy();
       case UploadStrategies.S3:
         return new S3Strategy();
       case UploadStrategies.DATABASE:
-        return new DBStrategy(fileRepository);
+        return new DBStrategy(fileDbRepository);
       default:
         throw new Error(`Unsupported upload strategy type: ${type}`);
     }

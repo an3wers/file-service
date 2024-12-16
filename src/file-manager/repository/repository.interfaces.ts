@@ -1,7 +1,14 @@
-import { FileModel } from "../models/file.model";
+import { FileDb } from "../models/file-db.model";
+import { FileMeta } from "../models/file-meta.model";
 
-export interface IFileRepository {
-  create(file: FileModel): Promise<FileModel>;
-  findById(uuid: string): Promise<FileModel | null>;
-  delete(uuid: string): Promise<void>;
+export interface IFileDbRepository {
+  create(file: FileDb): Promise<FileDb>;
+  findById(id: string): Promise<FileDb | null>;
+  delete(id: string): Promise<void>;
+}
+
+export interface IFileMetaRepository {
+  create(file: FileMeta): Promise<FileMeta>;
+  findById(id: string): Promise<FileMeta | null>;
+  delete(id: string): Promise<void>;
 }
