@@ -1,4 +1,5 @@
-import { IFileDbRepository } from "../repository/repository.interfaces";
+import { FileDb } from "../models/file-db.model";
+import { IFileRepository } from "../repository/repository.interfaces";
 import { DBStrategy } from "../strategies/db.strategy";
 import { LSStrategy } from "../strategies/ls.strategy";
 import { S3Strategy } from "../strategies/s3.strategy";
@@ -13,7 +14,7 @@ export enum UploadStrategies {
 export class UploadStrategyFactory {
   static createStrategy(
     type: UploadStrategies,
-    fileDbRepository: IFileDbRepository
+    fileDbRepository: IFileRepository<FileDb>
   ): IUploadStrategy {
     switch (type) {
       case UploadStrategies.LOCAL:

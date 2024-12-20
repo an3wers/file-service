@@ -5,7 +5,7 @@ export class FileMeta {
   extension: string;
   size: number;
   path: string;
-  fileId: string;
+  fileId: string; // Возможно лишнее
 
   constructor(data: FileMeta) {
     this.id = data.id;

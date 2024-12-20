@@ -1,6 +1,6 @@
 export class FileDb {
   id: string;
-  uuid: string;
+  uuid: string; // Возможно не нужно
   contents: Buffer;
 
   constructor(data: FileDb) {

@@ -12,3 +12,9 @@ export interface IFileMetaRepository {
   findById(id: string): Promise<FileMeta | null>;
   delete(id: string): Promise<void>;
 }
+
+export interface IFileRepository<M> {
+  create(file: M): Promise<M>;
+  findById(id: string): Promise<M | null>;
+  delete(id: string): Promise<void>;
+}

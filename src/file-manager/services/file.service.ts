@@ -2,11 +2,9 @@ import {
   UploadStrategies,
   UploadStrategyFactory,
 } from "../factories/upload-strategy.factory";
+import { FileDb } from "../models/file-db.model";
 import { FileMeta } from "../models/file-meta.model";
-import {
-  IFileDbRepository,
-  IFileMetaRepository,
-} from "../repository/repository.interfaces";
+import { IFileRepository } from "../repository/repository.interfaces";
 import { IUploadStrategy } from "../strategies/strategy.interfaces";
 
 export class FileService {
@@ -14,8 +12,8 @@ export class FileService {
 
   constructor(
     defaultStrategy: UploadStrategies,
-    private fileDbRepository: IFileDbRepository,
-    private fileMetaRepository: IFileMetaRepository
+    private fileDbRepository: IFileRepository<FileDb>,
+    private fileMetaRepository: IFileRepository<FileMeta>
   ) {
     this.uploadStrategy = UploadStrategyFactory.createStrategy(
       defaultStrategy,
@@ -35,8 +33,10 @@ export class FileService {
     return this.fileMetaRepository.create(uploadedFile);
   }
 
-  async download(id: string): Promise<FileMeta & { contents: Buffer | null }> {
-    const file = await this.fileMetaRepository.findById(id);
+  async download(
+    uuid: string
+  ): Promise<FileMeta & { contents: Buffer | null }> {
+    const file = await this.fileMetaRepository.findById(uuid);
 
     if (!file) {
       throw new Error("File not found");

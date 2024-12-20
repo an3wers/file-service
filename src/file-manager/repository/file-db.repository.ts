@@ -1,9 +1,9 @@
 import { Pool } from "pg";
-import { IFileDbRepository } from "./repository.interfaces";
+import { IFileDbRepository, IFileRepository } from "./repository.interfaces";
 import { FileDb } from "../models/file-db.model";
 import { config } from "../../config";
 
-export class FileDbRepository implements IFileDbRepository {
+export class FileDbRepository implements IFileRepository<FileDb> {
   private pool: Pool;
 
   constructor() {

@@ -1,9 +1,9 @@
 import { Pool } from "pg";
-import { IFileMetaRepository } from "./repository.interfaces";
+import { IFileRepository } from "./repository.interfaces";
 import { FileMeta } from "../models/file-meta.model";
 import { config } from "../../config";
 
-export class FileMetaRepository implements IFileMetaRepository {
+export class FileMetaRepository implements IFileRepository<FileMeta> {
   private pool: Pool;
 
   constructor() {

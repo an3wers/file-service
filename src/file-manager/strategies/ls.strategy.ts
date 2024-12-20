@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import path from "path";
 import { config } from "../../config";
 import fs from "fs";
-import { writeFile, unlink } from "fs/promises";
+import { writeFile, unlink, readFile } from "fs/promises";
 import { FileMeta } from "../models/file-meta.model";
 
 export class LSStrategy implements IUploadStrategy {
@@ -14,6 +14,9 @@ export class LSStrategy implements IUploadStrategy {
     const filePath = path.join(config.localStoragePath, uuid, fileName);
 
     await writeFile(filePath, file.buffer);
+
+    // Сделать запрос в БД и записать
+    // this.fileMetaRepository.create(uploadedFile)
 
     return new FileMeta({
       id: "",
@@ -26,7 +29,7 @@ export class LSStrategy implements IUploadStrategy {
     });
   }
 
-  async download(fileMeta: FileMeta): Promise<void> {
+  async download(fileMeta: FileMeta): Promise<Buffer> {
     const filePath = path.join(
       config.localStoragePath,
       fileMeta.fileId,
@@ -37,7 +40,7 @@ export class LSStrategy implements IUploadStrategy {
       throw new Error("File not found");
     }
 
-    return;
+    return await readFile(filePath);
   }
 
   async delete(fileMeta: FileMeta): Promise<void> {

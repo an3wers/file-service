@@ -40,7 +40,7 @@ export class S3Strategy implements IUploadStrategy {
   }
 
   async download(fileMeta: FileMeta): Promise<void> {
-    const key = `${fileMeta.fileId}-${fileMeta.name}`;
+    const key = `${fileMeta.fileId}-${fileMeta.name}`; // Можно использовать только uuid
     const result = await this.s3
       .getObject({
         Bucket: config.s3.bucket,
